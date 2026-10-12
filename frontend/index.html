@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Safari Cookie Test</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 0 20px;
+        line-height: 1.7;
+      }
+      button {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        margin: 12px 0;
+        font-size: 16px;
+      }
+      pre {
+        white-space: pre-wrap;
+        background: #f4f4f4;
+        padding: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Safari Cookie Test</h1>
+    <p>RenderのCookie発行と送信を確認します。</p>
+
+    <button onclick="setCookie()">1. Cookieを発行する</button>
+    <button onclick="checkCookie()">2. Cookie送信を確認する</button>
+    <button onclick="clearCookie()">3. Cookieを削除する</button>
+
+    <pre id="result">テスト開始前です。</pre>
+
+    <script>
+      // RenderにデプロイしたテストサーバーのURLに変更する
+      const API_URL = "https://YOUR-COOKIE-TEST.onrender.com";
+
+      async function request(path) {
+        const result = document.getElementById("result");
+        result.textContent = "通信中...";
+
+        try {
+          const response = await fetch(API_URL + path, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          });
+
+          const data = await response.json();
+
+          result.textContent = JSON.stringify(
+            {
+              status: response.status,
+              ...data,
+            },
+            null,
+            2,
+          );
+        } catch (error) {
+          result.textContent = "通信エラー: " + error.message;
+        }
+      }
+
+      function setCookie() {
+        return request("/set-cookie");
+      }
+
+      function checkCookie() {
+        return request("/check-cookie");
+      }
+
+      function clearCookie() {
+        return request("/clear-cookie");
+      }
+    </script>
+  </body>
+</html>
