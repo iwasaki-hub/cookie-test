@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
@@ -60,6 +61,50 @@ app.get("/clear-cookie", (req, res) => {
   });
 
   res.json({ message: "テスト用Cookieを削除しました" });
+});
+
+app.get("/same-origin-test", (req, res) => {
+  res.type("html").send(`
+    <!doctype html>
+    <html lang="ja">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Same-origin Cookie Test</title>
+    <body style="font-family:sans-serif;padding:24px">
+      <h1>Same-origin Cookie Test</h1>
+      <button id="set">1. Cookieを発行</button>
+      <button id="check">2. Cookieを確認</button>
+      <pre id="result">テスト開始前</pre>
+      <script>
+        const result = document.getElementById("result");
+
+        document.getElementById("set").onclick = async () => {
+          try {
+            const r = await fetch("/set-cookie", {
+              cache: "no-store"
+            });
+            result.textContent = await r.text();
+          } catch (e) {
+            result.textContent = e.message;
+          }
+        };
+
+        document.getElementById("check").onclick = async () => {
+          try {
+            const r = await fetch("/check-cookie", {
+              cache: "no-store"
+            });
+            result.textContent = JSON.stringify(
+              await r.json(), null, 2
+            );
+          } catch (e) {
+            result.textContent = e.message;
+          }
+        };
+      </script>
+    </body>
+    </html>
+  `);
 });
 
 app.listen(PORT, () => {
